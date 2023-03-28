@@ -31,7 +31,7 @@ object MyApp {
     dataProcessor.show(dataProcessor.df_1)
     dataProcessor.show(dataProcessor.df_2)
 
-    dataProcessor.save(dataProcessor.df_2, "best_apps.csv", "§")
+    dataProcessor.save(dataProcessor.df_2, "best_apps.csv")
 
   }
 }

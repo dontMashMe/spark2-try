@@ -17,13 +17,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\output\best_apps.csv\best_apps.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
       </map>
     </option>
   </component>

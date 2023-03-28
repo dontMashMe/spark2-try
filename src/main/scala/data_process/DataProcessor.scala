@@ -7,8 +7,8 @@ import org.apache.spark.sql.types._
 
 
 class DataProcessor(spark: SparkSession, data_source: Array[String]) {
-  private val _dFUserReviews = CSVHandler.load(spark, data_source(0))
-  private val _dFPlayStore = CSVHandler.load(spark, data_source(1))
+  private val _dFUserReviews = preClearData(CSVHandler.load(spark, data_source(0)))
+  private val _dFPlayStore = preClearData(CSVHandler.load(spark, data_source(1)))
 
   val df_1: DataFrame = getAvgSentimentPolarityOfApps
   val df_2: DataFrame = getHighRatingApps
@@ -17,8 +17,19 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
     df.show()
   }
 
-  def save(df: DataFrame, fileName: String, delimiter: String = "," ): Unit = {
+  def save(df: DataFrame, fileName: String, delimiter: String = ","): Unit = {
     CSVHandler.saveToCsv(df, fileName, delimiter)
+  }
+
+  /**
+   * Remove all garbage non-ascii characters from imported data.
+   * */
+  private def preClearData(df: DataFrame): DataFrame = {
+    val dfCleaned = df.columns.foldLeft(df) { (memoDF, colName) =>
+      memoDF.withColumn(colName, regexp_replace(df.col(colName),
+        "[^ -~]", ""))
+    }
+    dfCleaned
   }
 
   private def getAvgSentimentPolarityOfApps: DataFrame = {
@@ -29,10 +40,10 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
 
   private def getHighRatingApps: DataFrame = {
     val df_2 = _dFPlayStore
-        .filter(col ("Rating").isNotNull &&
-          !isnan(col("Rating")) &&
-          col("Rating").cast("double") > 4.0)
-        .sort(desc("Rating"))
+      .filter(col("Rating").isNotNull &&
+        !isnan(col("Rating")) &&
+        col("Rating").cast("double") >= 4.0)
+      .sort(desc("Rating"))
     df_2
   }
 

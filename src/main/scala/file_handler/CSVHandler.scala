@@ -24,7 +24,7 @@ object CSVHandler {
   /**
    * Workaround since I can't figure out how to correctly name the created CSV files.
    *
-   * Loop through the output path and remove the .crc files, then rename the CSV file to
+   * Loop through the output path and remove the .crc & SUCCESS  files, then rename the CSV file to
    * the given name and move it to data/output.
    *
    * On exit, remove the directory created by the saveToCsv() method.
@@ -33,18 +33,19 @@ object CSVHandler {
     val directory = new File(outputPath)
     if (directory.isDirectory) {
       val files = directory.listFiles()
-      for (file <- files){
-        if (file.getName.contains(".crc")) {
+      for (file <- files) {
+        //remove .crc and SUCCESS files
+        if (file.getName.contains(".crc") || !file.getName.contains(".csv")) {
           file.delete()
         } else {
           val dest = new File(outputPath + fileSeparator + filename)
           Files.move(file.toPath, dest.toPath, StandardCopyOption.ATOMIC_MOVE)
         }
-
       }
     }
     directory.deleteOnExit()
   }
+
   /**
    * Writes the given DataFrame to a CSV file.
    *
@@ -54,13 +55,14 @@ object CSVHandler {
    * */
 
   def saveToCsv(df: DataFrame, fileName: String, delimiter: String = ","): Unit = {
-    println(f"Writing $df to a file = $outputPath")
+    println(f"Writing $df to a file = $outputPath" + fileName)
 
     df
       .coalesce(1)
       .write.mode(SaveMode.Overwrite)
       .option("header", "true")
-      .option("escape", "\"") // schema breaks if the delimiter is in the data rows without escaping
+      .option("delimiter", delimiter)
+      .option("escape", "")
       .mode("overwrite")
       .csv(outputPath)
 

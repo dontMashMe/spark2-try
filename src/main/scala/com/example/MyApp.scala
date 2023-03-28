@@ -14,23 +14,24 @@ object MyApp {
     Logger.getLogger("akka").setLevel(Level.ERROR)
     val conf = new SparkConf()
       .setAppName("MyApp")
-      //since this is a standalone cluster, set the local node as a master.
       .setMaster("local[*]")
 
-    /*
-        Pass the configuration object using the config() method and build a session.
-    */
     val spark = SparkSession
       .builder()
       .config(conf)
+      .config("dfs.client.read.shortcircuit.skip.checksum", "true")
       .getOrCreate()
+
 
     val fileSeparator = java.io.File.separator
     val dataSources = Array(f"data$fileSeparator%sinput$fileSeparator%sgoogleplaystore_user_reviews.csv",
       f"data$fileSeparator%sinput$fileSeparator%sgoogleplaystore.csv")
 
-    val dataProcessor = new DataProcessor(spark = spark, data_source = dataSources)
+    val dataProcessor = new DataProcessor(spark, dataSources)
     dataProcessor.show(dataProcessor.df_1)
+    dataProcessor.show(dataProcessor.df_2)
+
+    dataProcessor.save(dataProcessor.df_2, "best_apps.csv", "§")
 
   }
 }

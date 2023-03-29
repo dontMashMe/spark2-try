@@ -18,9 +18,11 @@ object MyApp {
 
     val dataProcessor = new DataProcessor(spark, dataSources)
     // part 1
-    dataProcessor.show(dataProcessor.df_1)
+    //dataProcessor.show(dataProcessor.df_1)
     //part 2
-    dataProcessor.save(dataProcessor.df_2, "best_apps.csv")
+    //dataProcessor.save(dataProcessor.df_2, "best_apps.csv")
 
+    //dataProcessor.show(dataProcessor.df_3)
+    dataProcessor.save(dataProcessor.df_3, "whatever.csv")
   }
 }

@@ -11,6 +11,7 @@ object SparkSessionBuilder {
     .builder()
     .config(conf)
     .config("dfs.client.read.shortcircuit.skip.checksum", "true")
+    .config("spark.sql.parquet.compression.codec", "gzip")
     .getOrCreate()
 
   def getSparkSession: SparkSession = {

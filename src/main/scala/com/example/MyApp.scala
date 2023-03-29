@@ -1,6 +1,5 @@
 package com.example
 import org.apache.log4j.{Level, Logger}
-import com.example.SparkSessionBuilder
 import data_process.DataProcessor
 
 
@@ -17,12 +16,18 @@ object MyApp {
     val spark = SparkSessionBuilder.getSparkSession
 
     val dataProcessor = new DataProcessor(spark, dataSources)
+
     // part 1
     //dataProcessor.show(dataProcessor.df_1)
-    //part 2
-    //dataProcessor.save(dataProcessor.df_2, "best_apps.csv")
 
+    //part 2
+    dataProcessor.saveAsCsv(dataProcessor.df_2, "best_apps.csv")
+
+    //part 3
     //dataProcessor.show(dataProcessor.df_3)
-    dataProcessor.save(dataProcessor.df_3, "whatever.csv")
+
+    //part 4
+    dataProcessor.show(dataProcessor.df_Joined)
+    dataProcessor.saveAsParquet(dataProcessor.df_Joined, "googleplaystore_cleaned")
   }
 }

@@ -1,24 +1,29 @@
 package data_process
 
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import file_handler.CSVHandler
+import file_handler.FileHandler
 import org.apache.spark.sql.catalyst.dsl.expressions.{DslExpression, StringToAttributeConversionHelper}
 import org.apache.spark.sql.functions._
 
 class DataProcessor(spark: SparkSession, data_source: Array[String]) {
-  private val _dFUserReviews = preClearData(CSVHandler.load(spark, data_source(0)))
-  private val _dFPlayStore = preClearData(CSVHandler.load(spark, data_source(1)))
+  private val _dFUserReviews = preClearData(FileHandler.load(spark, data_source(0)))
+  private val _dFPlayStore = preClearData(FileHandler.load(spark, data_source(1)))
 
   val df_1: DataFrame = getAvgSentimentPolarityOfApps
   val df_2: DataFrame = getHighRatingApps
   val df_3: DataFrame = getPlayStoreTrans
+  val df_Joined: DataFrame = getJoinedPolarityAndTransPlayStore
 
   def show(df: DataFrame): Unit = {
     df.show()
   }
 
-  def save(df: DataFrame, fileName: String, delimiter: String = ","): Unit = {
-    CSVHandler.saveToCsv(df, fileName, delimiter)
+  def saveAsCsv(df: DataFrame, fileName: String, delimiter: String = ","): Unit = {
+    FileHandler.saveToCsv(df, fileName, delimiter)
+  }
+
+  def saveAsParquet(df: DataFrame, fileName: String): Unit = {
+    FileHandler.saveAsParquet(df, fileName)
   }
 
   /**
@@ -78,12 +83,14 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
     val finalDf = filteredDf.join(maxReviewsDf, Seq("App"))
       .filter(col("Reviews") === col("maxReviews"))
       .drop("maxReviews")
-      .filter(size(col("Categories")) >= 2)
 
-    finalDf.show()
-    finalDf.printSchema()
+    //finalDf.show()
+    //finalDf.printSchema()
     finalDf
+  }
 
+  private def getJoinedPolarityAndTransPlayStore: DataFrame = {
+    df_3.join(df_1, Seq("App"))
   }
 
 }

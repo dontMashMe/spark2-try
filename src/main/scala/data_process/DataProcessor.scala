@@ -1,8 +1,7 @@
 package data_process
 
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import file_handler.FileHandler
-import org.apache.spark.sql.catalyst.dsl.expressions.{DslExpression, StringToAttributeConversionHelper}
 import org.apache.spark.sql.functions._
 
 class DataProcessor(spark: SparkSession, data_source: Array[String]) {
@@ -11,8 +10,8 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
 
   val df_1: DataFrame = getAvgSentimentPolarityOfApps
   val df_2: DataFrame = getHighRatingApps
-  val df_3: DataFrame = getPlayStoreTrans
-  val df_Joined: DataFrame = getJoinedPolarityAndTransPlayStore
+  val df_3: DataFrame = getCleanedPlayStore
+  val df_Joined: DataFrame = getJoinedPlayStoreWithPolarity
 
   def show(df: DataFrame): Unit = {
     df.show()
@@ -52,9 +51,10 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
     df_2Temp
   }
 
-  private def getPlayStoreTrans: DataFrame = {
+  private def getCleanedPlayStore: DataFrame = {
     // perform initial grouping, casting and renaming.
     val filteredDf = _dFPlayStore
+      //handle the ; separated genre values
       .withColumn("Genres", explode(split(col("Genres"), ";")))
       .withColumn("Genres", trim(col("Genres")))
       .groupBy("App")
@@ -62,6 +62,7 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
         collect_set("Category").alias("Categories"),
         max("Rating").cast("Double").as("Rating"),
         max("Reviews").cast("Long").as("Reviews"),
+        // remove non-numerics
         max(regexp_extract(col("Size"), "(\\d+\\.?\\d*)", 1)).cast("Double").as("Size"),
         max("Installs").as("Installs"),
         max("Type").as("Type"),
@@ -75,6 +76,7 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
       .withColumnRenamed("Content_Rating", "Content_Rating")
       .withColumn("Price",
         when(col("Price") === "0", 0.0)
+          //remove the $ sign and convert to euro by dividing with 1.19 (also can multiply by 0.81)
           .otherwise(regexp_replace(col("Price"), "\\$", "").cast("Double") / 1.19)
       )
 
@@ -84,12 +86,10 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
       .filter(col("Reviews") === col("maxReviews"))
       .drop("maxReviews")
 
-    //finalDf.show()
-    //finalDf.printSchema()
     finalDf
   }
 
-  private def getJoinedPolarityAndTransPlayStore: DataFrame = {
+  private def getJoinedPlayStoreWithPolarity: DataFrame = {
     df_3.join(df_1, Seq("App"))
   }
 

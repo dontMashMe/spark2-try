@@ -2,7 +2,6 @@ package com.example
 import org.apache.log4j.{Level, Logger}
 import data_process.DataProcessor
 
-
 object MyApp {
   def main(args: Array[String]): Unit = {
 
@@ -21,13 +20,15 @@ object MyApp {
     //dataProcessor.show(dataProcessor.df_1)
 
     //part 2
+    //dataProcessor.show(dataProcessor.df_2)
     dataProcessor.saveAsCsv(dataProcessor.df_2, "best_apps.csv")
 
     //part 3
     //dataProcessor.show(dataProcessor.df_3)
 
     //part 4
-    dataProcessor.show(dataProcessor.df_Joined)
+    //dataProcessor.show(dataProcessor.df_Joined)
     dataProcessor.saveAsParquet(dataProcessor.df_Joined, "googleplaystore_cleaned")
+
   }
 }

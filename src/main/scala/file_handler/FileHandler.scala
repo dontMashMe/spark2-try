@@ -29,18 +29,14 @@ object FileHandler {
    * On exit, remove the directory created by the save methods.
    * */
   private def handleCreatedOutput(filename: String): Unit = {
-    val directory = new File(outputPath+f"dir_$filename")
+    val directory = new File(outputPath + f"dir_$filename")
     if (directory.isDirectory) {
       val files = directory.listFiles()
       for (file <- files) {
-        //remove .crc and SUCCESS files
         if (file.getName.contains("crc") || (!file.getName.contains(".csv") && !file.getName.contains("parquet"))) {
-          //println("Deleting = " + file.getName)
           file.delete()
         } else {
           val dest = new File(outputPath + filename)
-
-          //println(f"Moving ${file.toPath} -> ${dest.toPath}")
           Files.move(file.toPath, dest.toPath, StandardCopyOption.ATOMIC_MOVE)
         }
       }
@@ -65,7 +61,7 @@ object FileHandler {
       .option("delimiter", delimiter)
       .option("escape", "")
       .mode("overwrite")
-      .csv(outputPath+f"dir_$fileName")
+      .csv(outputPath + f"dir_$fileName")
 
     handleCreatedOutput(fileName)
   }
@@ -78,7 +74,7 @@ object FileHandler {
       .write
       .format("parquet")
       .option("compression", "gzip")
-      .save(outputPath+f"dir_$fileName")
+      .save(outputPath + f"dir_$fileName")
 
     handleCreatedOutput(fileName)
 

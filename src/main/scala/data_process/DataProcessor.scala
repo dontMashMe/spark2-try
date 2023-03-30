@@ -2,6 +2,7 @@ package data_process
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import file_handler.FileHandler
+import org.apache.spark.sql.catalyst.dsl.expressions.StringToAttributeConversionHelper
 import org.apache.spark.sql.functions._
 
 class DataProcessor(spark: SparkSession, data_source: Array[String]) {
@@ -12,6 +13,8 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
   val df_2: DataFrame = getHighRatingApps
   val df_3: DataFrame = getCleanedPlayStore
   val df_Joined: DataFrame = getJoinedPlayStoreWithPolarity
+
+  val df_4: DataFrame = getGooglePlaysStoreMetrics
 
   def show(df: DataFrame): Unit = {
     df.show()
@@ -91,6 +94,29 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
 
   private def getJoinedPlayStoreWithPolarity: DataFrame = {
     df_3.join(df_1, Seq("App"))
+  }
+
+  private def getGooglePlaysStoreMetrics: DataFrame = {
+
+    // Join cleanedPlayStoreDf with _dFUserReviews to get Sentiment_Polarity for each app
+    val joinedDf = df_3.join(
+      df_1.select("App", "Average_Sentiment_Polarity"),
+      Seq("App"),
+      "left"
+    )
+
+    // Explode Genres and group by Genre to get the required metrics
+    val genreDf = joinedDf.select(explode(col("Genres")).as("Genre"),
+                                  col("Rating"),
+                                  col("Average_Sentiment_Polarity"))
+      .na.drop(Seq("Rating"))
+      .groupBy("Genre")
+      .agg( count("Rating").as("Count"),
+            avg("Rating").as("Average_Rating"),
+            avg("Average_Sentiment_Polarity").as("Average_Sentiment_Polarity"))
+
+    genreDf
+
   }
 
 }

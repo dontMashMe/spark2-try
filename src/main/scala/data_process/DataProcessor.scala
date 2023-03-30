@@ -40,9 +40,11 @@ class DataProcessor(spark: SparkSession, data_source: Array[String]) {
   }
 
   private def getAvgSentimentPolarityOfApps: DataFrame = {
-    val df_1Temp = _dFUserReviews.groupBy("App")
+    val df_1Temp = _dFUserReviews
+      .na.drop(Seq("Sentiment_Polarity"))
+      .groupBy("App")
       .agg(avg("Sentiment_Polarity").alias("Average_Sentiment_Polarity"))
-    df_1Temp.na.fill(0, Seq("Average_Sentiment_Polarity"))
+    df_1Temp
   }
 
   private def getHighRatingApps: DataFrame = {

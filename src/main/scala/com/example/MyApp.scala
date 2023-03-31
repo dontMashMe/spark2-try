@@ -23,18 +23,18 @@ object MyApp {
 
     // part 2
     //dataProcessor.show(dataProcessor.df_2)
-    //dataProcessor.saveAsCsv(dataProcessor.df_2, "best_apps.csv")
+    dataProcessor.saveAsCsv(dataProcessor.df_2, "best_apps.csv")
 
     // part 3
     //dataProcessor.show(dataProcessor.df_3)
 
     // part 4
     //dataProcessor.show(dataProcessor.df_Joined)
-    //dataProcessor.saveAsParquet(dataProcessor.df_Joined, "googleplaystore_cleaned")
+    dataProcessor.saveAsParquet(dataProcessor.df_Joined, "googleplaystore_cleaned")
 
     // part 5
-    dataProcessor.show(dataProcessor.df_4)
-    dataProcessor.saveAsCsv(dataProcessor.df_4, "aaaaaaaaaaaa.csv")
+    //dataProcessor.show(dataProcessor.df_4)
+    dataProcessor.saveAsParquet(dataProcessor.df_4, "googleplaystore_metrics")
 
   }
 }
